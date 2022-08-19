@@ -3,20 +3,36 @@ import cv2
 import os
 import WindowManager
 
-cam = cv2.VideoCapture(0)
-
 nextFrame = 0
 frames = []
 currentFrame = 0
 playing = False
 
-mainWindow = WindowManager.mainWindow()
+is_working = True
+dev_port = 0
+working_ports = []
+while is_working:
+  camera = cv2.VideoCapture(dev_port)
+  if not camera.isOpened():
+    is_working = False
+  else:
+    is_reading, img = camera.read()
+    if is_reading:
+      working_ports.append(dev_port)
+  dev_port +=1
+
+mainWindow = WindowManager.mainWindow(working_ports)
 event, values = mainWindow.read(timeout=1)
 
+cam = cv2.VideoCapture(0)
+
 while True:
-  ret, frame = cam.read()
-  imgbytes=cv2.imencode('.png', frame)[1].tobytes()
-  mainWindow["-CAMERAVIEW-"].update(data=imgbytes, subsample=frame.shape[1] // 500)
+  if (values["-CAMERAPREVIEW-"]):
+    ret, frame = cam.read()
+    imgbytes=cv2.imencode('.png', frame)[1].tobytes()
+    mainWindow["-CAMERAVIEW-"].update(data=imgbytes, subsample=frame.shape[1] // 500)
+  else:
+    mainWindow["-CAMERAVIEW-"].update(data=None)
   try:
     fps = 1000 / int(values["-FPS-"])
   except:
@@ -26,6 +42,7 @@ while True:
     displayFrame = cv2.imread(f"frames/{currentFrame}.png")
     imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
     mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+    mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
     currentFrame += 1
     if (currentFrame == len(frames)):
       currentFrame = 0
@@ -47,5 +64,23 @@ while True:
       displayFrame = cv2.imread(f"frames/{selected}.png")
       imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
       mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+    case "-BEFORE-":
+      displayFrame = cv2.imread(f"frames/{currentFrame}.png")
+      imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
+      mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+      mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
+      currentFrame -= 1
+      if (currentFrame < 0):
+        currentFrame = len(frames) - 1
+    case "-NEXT-":
+      displayFrame = cv2.imread(f"frames/{currentFrame}.png")
+      imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
+      mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+      mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
+      currentFrame += 1
+      if (currentFrame == len(frames)):
+        currentFrame = 0
+    case "-CHANGECAMERA-":
+      cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
 
 mainWindow.close()

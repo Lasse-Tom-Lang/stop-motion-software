@@ -4,7 +4,7 @@ backgroundColor = "#323232"
 elementColor = "#404040"
 textColor = "white"
 
-def mainWindow():
+def mainWindow(activCameras):
   layout = [
     [
       sg.Listbox(
@@ -33,8 +33,24 @@ def mainWindow():
     ],
     [
       sg.Button(
+        "<",
+        key="-BEFORE-",
+        button_color=(
+          textColor,
+          elementColor
+        )
+      ),
+      sg.Button(
         "Play",
         key="-PLAY-",
+        button_color=(
+          textColor,
+          elementColor
+        )
+      ),
+      sg.Button(
+        ">",
+        key="-NEXT-",
         button_color=(
           textColor,
           elementColor
@@ -55,6 +71,24 @@ def mainWindow():
           textColor,
           elementColor
         )
+      ),
+      sg.Checkbox(
+        "Show camera",
+        True,
+        background_color=backgroundColor,
+        checkbox_color=elementColor,
+        text_color=textColor,
+        key="-CAMERAPREVIEW-",
+      ),
+      sg.Combo(
+        activCameras,
+        default_value=0,
+        background_color=elementColor,
+        text_color=textColor,
+        button_background_color=elementColor,
+        button_arrow_color=textColor,
+        change_submits=True,
+        key="-CHANGECAMERA-"
       )
     ]
   ]
@@ -63,5 +97,5 @@ def mainWindow():
     layout,
     resizable=True,
     background_color=backgroundColor,
-    location=(100, 100)
+    location=(0, 0)
   )
