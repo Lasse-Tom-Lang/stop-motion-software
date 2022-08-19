@@ -4,11 +4,11 @@ backgroundColor = "#323232"
 elementColor = "#404040"
 textColor = "white"
 
-def mainWindow(activCameras):
+def mainWindow(activCameras, frames):
   layout = [
     [
       sg.Listbox(
-        [],
+        frames,
         size=(
           5,
           40

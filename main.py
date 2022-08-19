@@ -4,7 +4,15 @@ import os
 import WindowManager
 
 nextFrame = 0
-frames = []
+
+frames = os.listdir("frames")
+frames.remove(".DS_Store")
+a = 0
+while a < len(frames):
+  frames[a] = int(frames[a][0:-4])
+  a += 1
+frames.sort()
+
 currentFrame = 0
 playing = False
 
@@ -21,7 +29,7 @@ while is_working:
       working_ports.append(dev_port)
   dev_port +=1
 
-mainWindow = WindowManager.mainWindow(working_ports)
+mainWindow = WindowManager.mainWindow(working_ports, frames)
 event, values = mainWindow.read(timeout=1)
 
 cam = cv2.VideoCapture(0)
