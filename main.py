@@ -3,8 +3,6 @@ import cv2
 import os
 import WindowManager
 
-nextFrame = 0
-
 frames = os.listdir("frames")
 frames.remove(".DS_Store")
 a = 0
@@ -12,6 +10,8 @@ while a < len(frames):
   frames[a] = int(frames[a][0:-4])
   a += 1
 frames.sort()
+
+nextFrame = len(frames)
 
 currentFrame = 0
 playing = False
@@ -42,10 +42,12 @@ while True:
   else:
     mainWindow["-CAMERAVIEW-"].update(data=None)
   try:
-    fps = 1000 / int(values["-FPS-"])
+    fpsTimeout = 1000 / int(values["-FPS-"])
+    fps = int(values["-FPS-"])
   except:
-    fps = 1000 / 60
-  event, values = mainWindow.read(timeout=fps)
+    fpsTimeout = 1000 / 60
+    fps = 60
+  event, values = mainWindow.read(timeout=fpsTimeout)
   if playing and len(frames) > 0:
     displayFrame = cv2.imread(f"frames/{currentFrame}.png")
     imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
@@ -90,5 +92,19 @@ while True:
         currentFrame = 0
     case "-CHANGECAMERA-":
       cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
+    case "-RENDER-":
+      renderWindow = WindowManager.renderWindow(len(frames))
+      images = [img for img in os.listdir("frames") if img.endswith(".png")]
+      frame = cv2.imread(os.path.join("frames", images[0]))
+      height, width, layers = frame.shape 
+      video = cv2.VideoWriter("Video.avi", 0, fps, (width,height))
+      a = 0
+      for image in images:
+        renderWindow.read(timeout=1)
+        video.write(cv2.imread(os.path.join("frames", image)))
+        renderWindow["-RENDERPROGRESS-"].UpdateBar(a)
+        a = a + 1
+      video.release()
+      renderWindow.close()
 
 mainWindow.close()

@@ -61,6 +61,14 @@ def mainWindow(activCameras, frames):
         key="-FPS-",
         background_color=elementColor,
         text_color=textColor
+      ),
+      sg.Button(
+        "Render",
+        key="-RENDER-",
+        button_color=(
+          textColor,
+          elementColor
+        )
       )
     ],
     [
@@ -98,4 +106,34 @@ def mainWindow(activCameras, frames):
     resizable=True,
     background_color=backgroundColor,
     location=(0, 0)
+  )
+
+def renderWindow(frames):
+  layout = [
+    [
+      sg.ProgressBar(
+        frames,
+        orientation="horizontal",
+        bar_color=(
+          "blue",
+          elementColor
+        ),
+        size=(
+          50,
+          30
+        ),
+        key="-RENDERPROGRESS-"
+      )
+    ]
+  ]
+  return sg.Window(
+    "Rendering",
+    layout,
+    background_color=backgroundColor,
+    location=(
+      100,
+      100
+    ),
+    disable_close=True,
+    no_titlebar=True
   )
