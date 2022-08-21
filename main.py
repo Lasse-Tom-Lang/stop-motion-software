@@ -3,13 +3,10 @@ import cv2
 import os
 import WindowManager
 
-frames = os.listdir("frames")
-frames.remove(".DS_Store")
-a = 0
-while a < len(frames):
-  frames[a] = int(frames[a][0:-4])
-  a += 1
+frames = [img[0:-4] for img in os.listdir("frames") if img.endswith(".png")]
 frames.sort()
+
+images = [cv2.imread(os.path.join("frames", f"{frame}.png")) for frame in frames]
 
 nextFrame = len(frames)
 
@@ -49,7 +46,7 @@ while True:
     fps = 60
   event, values = mainWindow.read(timeout=fpsTimeout)
   if playing and len(frames) > 0:
-    displayFrame = cv2.imread(f"frames/{currentFrame}.png")
+    displayFrame = images[currentFrame]
     imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
     mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
     mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
@@ -67,15 +64,16 @@ while True:
     case "-TAKEIMAGE-":
       cv2.imwrite(f"frames/{nextFrame}.png",frame)
       frames.append(nextFrame)
+      images.append(frame)
       mainWindow["-FRAMES-"].update(frames)
       nextFrame += 1
     case "-FRAMES-":
-      selected = values["-FRAMES-"][0]
-      displayFrame = cv2.imread(f"frames/{selected}.png")
+      selected = int(values["-FRAMES-"][0])
+      displayFrame = images[selected]
       imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
       mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
     case "-BEFORE-":
-      displayFrame = cv2.imread(f"frames/{currentFrame}.png")
+      displayFrame = images[currentFrame]
       imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
       mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
       mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
@@ -83,7 +81,7 @@ while True:
       if (currentFrame < 0):
         currentFrame = len(frames) - 1
     case "-NEXT-":
-      displayFrame = cv2.imread(f"frames/{currentFrame}.png")
+      displayFrame = images[currentFrame]
       imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
       mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
       mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
@@ -94,14 +92,12 @@ while True:
       cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
     case "-RENDER-":
       renderWindow = WindowManager.renderWindow(len(frames))
-      images = [img for img in os.listdir("frames") if img.endswith(".png")]
-      frame = cv2.imread(os.path.join("frames", images[0]))
-      height, width, layers = frame.shape 
+      height, width, layers = images[0].shape 
       video = cv2.VideoWriter("Video.avi", 0, fps, (width,height))
       a = 0
       for image in images:
         renderWindow.read(timeout=1)
-        video.write(cv2.imread(os.path.join("frames", image)))
+        video.write(image)
         renderWindow["-RENDERPROGRESS-"].UpdateBar(a)
         a = a + 1
       video.release()
