@@ -37,6 +37,12 @@ mainWindow = WindowManager.mainWindow(working_ports, order)
 event, values = mainWindow.read(timeout=1)
 mainWindow.maximize()
 
+if (len(images) > 0):
+  displayFrame = images[currentFrame]
+  imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
+  mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+  mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
+
 cam = cv2.VideoCapture(0)
 
 while True:
@@ -53,8 +59,6 @@ while True:
     ret, frame = cam.read()
     imgbytes=cv2.imencode('.png', frame)[1].tobytes()
     mainWindow["-CAMERAVIEW-"].update(data=imgbytes, subsample=frame.shape[1] // 500)
-  else:
-    mainWindow["-CAMERAVIEW-"].update(data=None)
   if playing and len(order) > 0:
     displayFrame = images[currentFrame]
     imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
@@ -65,12 +69,13 @@ while True:
       currentFrame = 0
   match event:
     case "-PLAY-":
-      if playing:
-        playing = False
-        mainWindow["-PLAY-"].update("Play")
-      else:
-        playing = True
-        mainWindow["-PLAY-"].update("Pause")
+      if (len(images) > 0):
+        if playing:
+          playing = False
+          mainWindow["-PLAY-"].update("Play")
+        else:
+          playing = True
+          mainWindow["-PLAY-"].update("Pause")
     case "-TAKEIMAGE-":
       cv2.imwrite(f"frames/{nextFrame}.png",frame)
       order.append(nextFrame)
@@ -78,29 +83,30 @@ while True:
       mainWindow["-FRAMES-"].update(order)
       nextFrame += 1
     case "-FRAMES-":
-      if (len(values["-FRAMES-"]) > 0):
-        selected = int(values["-FRAMES-"][0])
+      if (len(values["-FRAMES-"]) > 0 and values["-FRAMES-"] != ""):
+        selected = order.index(values["-FRAMES-"][0])
+        currentFrame = selected
         displayFrame = images[selected]
         imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
         mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
     case "-BEFORE-":
       if (len(images) != 0):
-        displayFrame = images[currentFrame]
-        imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
-        mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
-        mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
         currentFrame -= 1
         if (currentFrame < 0):
           currentFrame = len(order) - 1
-    case "-NEXT-":
-      if (len(images) != 0):
         displayFrame = images[currentFrame]
         imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
         mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
         mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
+    case "-NEXT-":
+      if (len(images) != 0):
         currentFrame += 1
         if (currentFrame == len(order)):
           currentFrame = 0
+        displayFrame = images[currentFrame]
+        imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
+        mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+        mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
     case "-CHANGECAMERA-":
       cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
     case "-RENDER-":
@@ -115,7 +121,12 @@ while True:
         a = a + 1
       video.release()
       renderWindow.close()
-
+    case "-DELETEFRAME-":
+      if (len(values["-FRAMES-"]) == 1 and values["-FRAMES-"][0] != ""):
+        del images[order.index(values["-FRAMES-"][0])]
+        os.remove(f"frames/{values['-FRAMES-'][0]}.png")
+        del order[order.index(values["-FRAMES-"][0])]
+        mainWindow["-FRAMES-"].update(order)
 with open("frames/order.txt", "w") as orderFile:
   orderToSave = ""
   for item in order:

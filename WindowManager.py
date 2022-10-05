@@ -96,6 +96,26 @@ def mainWindow(activCameras, frames):
           ],
           [
             sg.Frame(
+              "Frames",
+              [
+                [
+                  sg.Button(
+                    "Delete Frame",
+                    key="-DELETEFRAME-",
+                    button_color=(
+                      textColor,
+                      elementColor
+                    ),
+                    font="Arial 12"
+                  )
+                ]
+              ],
+              title_color=textColor,
+              background_color=backgroundColor,
+              font="Arial 20",
+              pad=0
+            ),
+            sg.Frame(
               "Input", 
               [
                 [
@@ -137,7 +157,7 @@ def mainWindow(activCameras, frames):
             )
           ]
         ],
-        pad=0,
+        pad=1,
         expand_x=True,
         expand_y=True,
         background_color=backgroundColor
