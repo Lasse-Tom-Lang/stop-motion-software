@@ -67,8 +67,10 @@ while True:
     case "-PLAY-":
       if playing:
         playing = False
+        mainWindow["-PLAY-"].update("Play")
       else:
         playing = True
+        mainWindow["-PLAY-"].update("Pause")
     case "-TAKEIMAGE-":
       cv2.imwrite(f"frames/{nextFrame}.png",frame)
       order.append(nextFrame)
@@ -82,21 +84,23 @@ while True:
         imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
         mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
     case "-BEFORE-":
-      displayFrame = images[currentFrame]
-      imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
-      mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
-      mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
-      currentFrame -= 1
-      if (currentFrame < 0):
-        currentFrame = len(order) - 1
+      if (len(images) != 0):
+        displayFrame = images[currentFrame]
+        imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
+        mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+        mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
+        currentFrame -= 1
+        if (currentFrame < 0):
+          currentFrame = len(order) - 1
     case "-NEXT-":
-      displayFrame = images[currentFrame]
-      imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
-      mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
-      mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
-      currentFrame += 1
-      if (currentFrame == len(order)):
-        currentFrame = 0
+      if (len(images) != 0):
+        displayFrame = images[currentFrame]
+        imagebytes = cv2.imencode('.png', displayFrame)[1].tobytes()
+        mainWindow["-FRAME-"].update(data=imagebytes, subsample=displayFrame.shape[1] // 500)
+        mainWindow["-FRAMES-"].update(set_to_index=[currentFrame], scroll_to_index=currentFrame)
+        currentFrame += 1
+        if (currentFrame == len(order)):
+          currentFrame = 0
     case "-CHANGECAMERA-":
       cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
     case "-RENDER-":
