@@ -3,6 +3,9 @@ import cv2
 import os
 import WindowManager
 
+if (not os.path.exists("frames")):
+  os.mkdir("frames")
+
 if (not os.path.exists("frames/order.txt")):
   with open("frames/order.txt", "x"):
     pass
@@ -110,17 +113,18 @@ while True:
     case "-CHANGECAMERA-":
       cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
     case "-RENDER-":
-      renderWindow = WindowManager.renderWindow(len(order))
-      height, width, layers = images[0].shape 
-      video = cv2.VideoWriter("Video.avi", 0, fps, (width,height))
-      a = 0
-      for image in images:
-        renderWindow.read(timeout=1)
-        video.write(image)
-        renderWindow["-RENDERPROGRESS-"].UpdateBar(a)
-        a = a + 1
-      video.release()
-      renderWindow.close()
+      if (len(order) > 0):
+        renderWindow = WindowManager.renderWindow(len(order))
+        height, width, layers = images[0].shape 
+        video = cv2.VideoWriter("Video.avi", 0, fps, (width,height))
+        a = 0
+        for image in images:
+          renderWindow.read(timeout=1)
+          video.write(image)
+          renderWindow["-RENDERPROGRESS-"].UpdateBar(a)
+          a = a + 1
+        video.release()
+        renderWindow.close()
     case "-DELETEFRAME-":
       if (len(values["-FRAMES-"]) == 1 and values["-FRAMES-"][0] != ""):
         del images[order.index(values["-FRAMES-"][0])]
