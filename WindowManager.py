@@ -1,12 +1,13 @@
-from tkinter import CENTER, LEFT
-from turtle import width
+"""
+  The WindowManager creates new windows with PySimpleGUI
+"""
 import PySimpleGUI as sg
 
 backgroundColor = "#323232"
 elementColor = "#404040"
 textColor = "white"
 
-def mainWindow(activCameras, frames):
+def mainWindow(activCameras: list[int], frames: list[int]) -> sg.Window:
   layout = [
     [
       sg.Column(
@@ -172,7 +173,7 @@ def mainWindow(activCameras, frames):
     location=(0, 0)
   )
 
-def renderWindow(frames):
+def renderWindow(frames: int) -> sg.Window:
   layout = [
     [
       sg.ProgressBar(
