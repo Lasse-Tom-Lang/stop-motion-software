@@ -80,19 +80,18 @@ def mainWindow(activCameras: list[int], frames: list[int]) -> sg.Window:
               border_width=0,
               font="Arial 16"
             ),
+            sg.Text(
+              "FPS:",
+              text_color=textColor,
+              background_color=backgroundColor,
+              font="Arial 16"
+            ),
             sg.In(
               60,
               key="-FPS-",
               background_color=elementColor,
-              text_color=textColor
-            ),
-            sg.Button(
-              "Render",
-              key="-RENDER-",
-              button_color=(
-                textColor,
-                elementColor
-              )
+              text_color=textColor,
+              size=(3, 1)
             )
           ],
           [
@@ -147,6 +146,46 @@ def mainWindow(activCameras: list[int], frames: list[int]) -> sg.Window:
                     button_arrow_color=textColor,
                     change_submits=True,
                     key="-CHANGECAMERA-",
+                    font="Arial 12"
+                  )
+                ]
+              ],
+              title_color=textColor,
+              background_color=backgroundColor,
+              font="Arial 20",
+              pad=0
+            ),
+            sg.Frame(
+              "Rendering",
+              [
+                [
+                  sg.FileSaveAs(
+                    "Save Video",
+                    button_color=(
+                      textColor,
+                      elementColor
+                    ),
+                    font="Arial 12",
+                    target="-FILENAME-"
+                  ),
+                  sg.In(
+                    size=(20, 1),
+                    key="-FILENAME-",
+                    text_color=textColor,
+                    font="Arial 12",
+                    disabled=True,
+                    border_width=0,
+                    disabled_readonly_background_color=elementColor
+                  )
+                ],
+                [
+                  sg.Button(
+                    "Render",
+                    key="-RENDER-",
+                    button_color=(
+                      textColor,
+                      elementColor
+                    ),
                     font="Arial 12"
                   )
                 ]

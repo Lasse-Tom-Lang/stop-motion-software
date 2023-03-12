@@ -105,6 +105,7 @@ def main():
         images.append(frame)
         mainWindow["-FRAMES-"].update(order)
         nextFrame += 1
+        saveFrames(order)
       case "-FRAMES-":
         if (len(values["-FRAMES-"]) > 0 and values["-FRAMES-"] != ""):
           selected = order.index(values["-FRAMES-"][0])
@@ -133,10 +134,10 @@ def main():
       case "-CHANGECAMERA-":
         cam = cv2.VideoCapture(values["-CHANGECAMERA-"])
       case "-RENDER-":
-        if (len(order) > 0):
+        if (len(order) > 0 and values["-FILENAME-"] != ""):
           renderWindow = WindowManager.renderWindow(len(order))
           height, width, layers = images[0].shape 
-          video = cv2.VideoWriter("Video.avi", 0, fps, (width,height))
+          video = cv2.VideoWriter(f"{values['-FILENAME-']}.avi", 0, fps, (width,height))
           a = 0
           for image in images:
             renderWindow.read(timeout=1)
